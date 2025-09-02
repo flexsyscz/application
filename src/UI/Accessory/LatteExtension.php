@@ -57,8 +57,11 @@ class LatteExtension extends Extension
 			$hash = hash_file('sha256', $absolutePath);
 
 			$path = FileSystem::normalizePath($this->assetsDirectory->getRelativePath($path));
+			$path = str_replace('\\', '/', $path);
 			$basePath = $this->httpRequest->getUrl()->getBasePath();
-			return sprintf('%s%s/%s?hash=%s', $this->httpRequest->getUrl()->getHostUrl(), $basePath === '/' ? '' : $basePath, $path, $hash);
+			$httpRelativePath = sprintf('%s/%s?hash=%s', $basePath === '/' ? '' : $basePath, $path, $hash);
+
+			return $this->httpRequest->getUrl()->getHostUrl() . preg_replace('#/+#', '/', $httpRelativePath);
 		}
 
 		throw new AssetNotFoundException(sprintf("Asset '%s' not found.", $path));
